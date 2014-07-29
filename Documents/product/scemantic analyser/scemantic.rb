@@ -1,8 +1,9 @@
 def is_up?(word)
     !(word =~ /^[A-Z]*$/).nil?
 end
-input_org=["FA-> id ","TB-> FA ","S-> TB ","FA-> id ","TB-> FA ","S-> S + TB "]
+#input_org=["FA-> id ","TB-> FA ","S-> TB ","FA-> id ","TB-> FA ","S-> S + TB "]
 input_dup=["FA-> id ","TB-> FA ","S-> TB ","FA-> id ","TB-> FA ","S-> S + TB "]
+#input_dup=["S-> id ","S-> id ","T-> S * S "]
 Tree=Array.new
 stack=Array.new
 val=""
@@ -30,9 +31,9 @@ for i in 0..(input_dup.length-1)
 			id_finder=id_finder+1
 			Tree.push(:id=>id_finder,:data=>val,:parent_id=>value[:id])
 		else 
-		   if h = stack.find { |h| h[:data]==val&&h[:parent_id]==nil}
-              stack.pop
-              if r=Tree.find {|r| r[:data]==val&&r[:parent_id]==nil}
+		   if h=stack.find { |h| h[:data]==val&&h[:parent_id]==nil}
+              v=stack.pop
+              if r=Tree.find {|r| r==v}
               	r[:parent_id]=value[:id]
               end
             else
@@ -44,5 +45,33 @@ for i in 0..(input_dup.length-1)
 	stack.push(value)
 	Tree.push(value)
 end
-print Tree
+#print Tree
 #print "\n"
+root = {:id => 0, :data => '', :parent_id => nil}
+map = {}
+
+Tree.each do |e|
+  map[e[:id]] = e
+end
+
+@@tree = {}
+
+Tree.each do |e|
+  pid = e[:parent_id]
+  if pid == nil || !map.has_key?(pid)
+    (@@tree[root] ||= []) << e
+  else
+    (@@tree[map[pid]] ||= []) << e
+  end
+end
+def print_tree(item, level)
+  items = @@tree[item]
+  unless items == nil
+    indent = level > 0 ? sprintf("%#{level * 2}s", " ") : ""
+    items.each do |e|
+      puts "#{indent}-#{e[:data]}"
+      print_tree(e, level + 1)
+    end
+  end
+end
+print_tree(root, 0)
